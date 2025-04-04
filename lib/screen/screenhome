@@ -1,0 +1,41 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/car_service.dart';
+import '../models/car.dart';
+
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Carros eléctricos')),
+      body: FutureBuilder<List<Car>>(
+        future: CarService().getCars(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No hay carros disponibles.'));
+          }
+
+          final cars = snapshot.data!;
+          return ListView.builder(
+            itemCount: cars.length,
+            itemBuilder: (context, index) {
+              final car = cars[index];
+              return ListTile(
+                title: Text(car.model),
+                subtitle: Text(car.brand),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
